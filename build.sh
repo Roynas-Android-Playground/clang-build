@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright ©2022-2024 XSans0
+# Copyright ©2022-2024 Roynas-Android-Playground
 
 # Function to show an informational message
 msg() {
@@ -42,7 +42,7 @@ send_file() {
 
 # Building LLVM's
 msg "Building LLVM ..."
-send_msg "<b>Start build WeebX Clang from <code>[ $BRANCH ]</code> branch</b>"
+send_msg "<b>Start build Apple Clang from <code>[ $BRANCH ]</code> branch</b>"
 ./build-llvm.py \
     --defines LLVM_PARALLEL_COMPILE_JOBS="$(nproc)" LLVM_PARALLEL_LINK_JOBS="$(nproc)" CMAKE_C_FLAGS=-O3 CMAKE_CXX_FLAGS=-O3 \
     --install-folder "$HOME_DIR/install" \
@@ -52,7 +52,7 @@ send_msg "<b>Start build WeebX Clang from <code>[ $BRANCH ]</code> branch</b>"
     --ref "$BRANCH" \
     --shallow-clone \
     --targets AArch64 ARM X86 \
-    --vendor-string "WeebX"
+    --vendor-string "Apple"
 
 # Check if the final clang binary exists or not
 for file in install/bin/clang-[1-9]*; do
@@ -89,10 +89,6 @@ for bin in $(find install -mindepth 2 -maxdepth 3 -type f -exec file {} \; | gre
     patchelf --set-rpath "$DIR/../lib" "$bin"
 done
 
-# Git config
-git config --global user.name "XSans0"
-git config --global user.email "xsansdroid@gmail.com"
-
 # Get Clang Info
 pushd "$HOME_DIR"/src/llvm-project || exit
 llvm_commit="$(git rev-parse HEAD)"
@@ -101,9 +97,9 @@ popd || exit
 llvm_commit_url="https://github.com/llvm/llvm-project/commit/$short_llvm_commit"
 clang_version="$("$HOME_DIR"/install/bin/clang --version | head -n1 | cut -d' ' -f4)"
 build_date="$(TZ=Asia/Jakarta date +"%Y-%m-%d")"
-tags="WeebX-Clang-$clang_version-release"
-file="WeebX-Clang-$clang_version.tar.gz"
-clang_link="https://github.com/XSans0/WeebX-Clang/releases/download/$tags/$file"
+tags="Apple-Clang-$clang_version-release"
+file="Apple-Clang-$clang_version.tar.gz"
+clang_link="https://github.com/Roynas-Android-Playground/Apple-Clang/releases/download/$tags/$file"
 
 # Get binutils version
 binutils_version=$(grep "LATEST_BINUTILS_RELEASE" build-binutils.py)
@@ -123,7 +119,7 @@ tar -czvf ../"$file" .
 popd || exit
 
 # Push
-git clone "https://XSans0:$GIT_TOKEN@github.com/XSans0/WeebX-Clang.git" rel_repo
+git clone "https://Roynas-Android-Playground:$GIT_TOKEN@github.com/Roynas-Android-Playground/Apple-Clang.git" rel_repo
 pushd rel_repo || exit
 if [ -d "$BRANCH" ]; then
     echo "$clang_link" >"$BRANCH"/link.txt
@@ -134,7 +130,7 @@ else
     cp -r "$HOME_DIR"/install/README.md "$BRANCH"
 fi
 git add .
-git commit -asm "WeebX-Clang-$clang_version: $(TZ=Asia/Jakarta date +"%Y%m%d")"
+git commit -asm "Apple-Clang-$clang_version: $(TZ=Asia/Seoul date +"%Y%m%d")"
 git push -f origin main
 
 # Check tags already exists or not
@@ -147,15 +143,15 @@ failed=n
 if [ "$overwrite" == "y" ]; then
     ./github-release edit \
         --security-token "$GIT_TOKEN" \
-        --user "XSans0" \
-        --repo "WeebX-Clang" \
+        --user "Roynas-Android-Playground" \
+        --repo "Apple-Clang" \
         --tag "$tags" \
         --description "$(cat "$HOME_DIR"/install/README.md)"
 
     ./github-release upload \
         --security-token "$GIT_TOKEN" \
-        --user "XSans0" \
-        --repo "WeebX-Clang" \
+        --user "Roynas-Android-Playground" \
+        --repo "Apple-Clang" \
         --tag "$tags" \
         --name "$file" \
         --file "$HOME_DIR/$file" \
@@ -163,15 +159,15 @@ if [ "$overwrite" == "y" ]; then
 else
     ./github-release release \
         --security-token "$GIT_TOKEN" \
-        --user "XSans0" \
-        --repo "WeebX-Clang" \
+        --user "Roynas-Android-Playground" \
+        --repo "Apple-Clang" \
         --tag "$tags" \
         --description "$(cat "$HOME_DIR"/install/README.md)"
 
     ./github-release upload \
         --security-token "$GIT_TOKEN" \
-        --user "XSans0" \
-        --repo "WeebX-Clang" \
+        --user "Roynas-Android-Playground" \
+        --repo "Apple-Clang" \
         --tag "$tags" \
         --name "$file" \
         --file "$HOME_DIR/$file" || failed=y
@@ -183,8 +179,8 @@ while [ "$failed" == "y" ]; do
     msg "Upload again"
     ./github-release upload \
         --security-token "$GIT_TOKEN" \
-        --user "XSans0" \
-        --repo "WeebX-Clang" \
+        --user "Roynas-Android-Playground" \
+        --repo "Apple-Clang" \
         --tag "$tags" \
         --name "$file" \
         --file "$HOME_DIR/$file" \
@@ -203,5 +199,5 @@ send_msg "
 <b>Compile Based : </b>
 * <a href='$llvm_commit_url'>$llvm_commit_url</a>
 <b>Push Repository : </b>
-* <a href='https://github.com/XSans0/WeebX-Clang.git'>WeebX-Clang</a>
+* <a href='https://github.com/Roynas-Android-Playground/Apple-Clang.git'>Apple-Clang</a>
 <b>-------------------------------------------------</b>"
